@@ -1,0 +1,15 @@
+[project]
+name = "neo4j-api"
+version = "0.1.0"
+description = "Minimal Neo4j client: upsert nodes with relationships, query, and run Cypher"
+requires-python = ">=3.10"
+dependencies = [
+    "neo4j>=5.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/neo4j_api"]

@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+shopt -s nullglob
+wheels=("$SCRIPT_DIR"/*.whl)
+shopt -u nullglob
+
+if (( ${#wheels[@]} == 0 )); then
+  echo "error: no .whl in $SCRIPT_DIR" >&2
+  exit 1
+fi
+
+# neo4j-api first (local dep of c-parser), then the rest
+ordered=()
+for w in "${wheels[@]}"; do
+  [[ "$(basename "$w")" == neo4j_api-* ]] && ordered+=("$w")
+done
+for w in "${wheels[@]}"; do
+  [[ "$(basename "$w")" == neo4j_api-* ]] || ordered+=("$w")
+done
+
+# User install → ~/.local/bin/c-parser (PEP 668 / Arch needs --break-system-packages)
+python3 -m pip install --user --force-reinstall --break-system-packages "${ordered[@]}"
+
+if command -v c-parser >/dev/null 2>&1; then
+  echo "installed: $(command -v c-parser)"
+else
+  echo "installed, but c-parser not on PATH — add ~/.local/bin to PATH" >&2
+  exit 1
+fi
